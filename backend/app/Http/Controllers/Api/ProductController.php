@@ -7,8 +7,10 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Supplier;
 use App\Models\InventoryMovement;
-use App\Services\InventoryService;
 use Illuminate\Http\Request;
+use App\Services\InventoryService;
+use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\AdjustStockRequest;
 
 class ProductController extends Controller
 {
@@ -44,19 +46,9 @@ class ProductController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'sku' => 'required|string|max:100',
-            'category_id' => 'nullable|exists:categories,id',
-            'supplier_id' => 'nullable|exists:suppliers,id',
-            'price' => 'required|numeric|min:0',
-            'cost' => 'nullable|numeric|min:0',
-            'current_stock' => 'required|integer|min:0',
-            'reorder_level' => 'nullable|integer|min:0',
-            'description' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         $product = Product::create($validated);
         $product->refreshStockStatus();
@@ -78,13 +70,10 @@ class ProductController extends Controller
         return response()->json($product->load(['category', 'supplier']), 201);
     }
 
-    public function adjustStock(Request $request, $id)
+    public function adjustStock(AdjustStockRequest $request, $id)
     {
-        $request->validate([
-            'type'     => 'required|string|in:PURCHASE,SALE,RETURN,DAMAGE,ADJUSTMENT,TRANSFER',
-            'quantity' => 'required|integer|not_in:0',
-            'notes'    => 'nullable|string',
-        ]);
+        $validated = $request->validated();
+
 
         $product = Product::findOrFail($id);
 
