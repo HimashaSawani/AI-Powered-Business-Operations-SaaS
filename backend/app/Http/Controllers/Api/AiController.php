@@ -65,7 +65,7 @@ class AiController extends Controller
             // Fallback to internal statistical forecast algorithm
         }
 
-        // Calibrated local fallback calculation
+        // Calibrated local fallback calculation.
         $avgDaily = round(array_sum($recentSalesUnits) / count($recentSalesUnits), 1);
         $daysUntilOut = $product->current_stock > 0 ? (int) floor($product->current_stock / max(1, $avgDaily)) : 0;
         $urgency = $daysUntilOut <= 7 ? 'CRITICAL' : ($daysUntilOut <= 14 ? 'URGENT' : 'HEALTHY');
