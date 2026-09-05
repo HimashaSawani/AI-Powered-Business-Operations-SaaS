@@ -7,7 +7,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
 /**
- * Section 32 — Domain Event: Order Created
+ * Domain Event: Order Created
  *
  * Fired after an order is successfully committed to the database.
  * Triggers: UpdateCustomerMetrics listener.

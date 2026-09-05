@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Section 32 — API Resource: Customer
+ * API Resource: Customer
  *
  * Transforms Customer model into a consistent JSON API response
  * including health score and latest AI churn assessment.

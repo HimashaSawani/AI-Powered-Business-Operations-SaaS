@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Section 32 — API Resource: Ticket
+ * API Resource: Ticket
  *
  * Transforms Ticket model to consistent JSON with AI classification fields.
  */

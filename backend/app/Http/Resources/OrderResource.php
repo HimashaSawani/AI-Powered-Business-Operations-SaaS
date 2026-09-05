@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Section 32 — API Resource: Order
+ * API Resource: Order
  *
  * Transforms Order model into a consistent JSON API response
  * with nested customer and items relationships.
