@@ -12,7 +12,7 @@ A multi-tenant business operations platform with an integrated Python AI engine 
 
 ## 🌐 Live Demo
 
-**Live Application:** https://ai-powered-business-operations-saa.vercel.app/
+Live Application: https://ai-powered-business-operations-saa.vercel.app/
 ---
 
 ## 🏗️ Architecture
