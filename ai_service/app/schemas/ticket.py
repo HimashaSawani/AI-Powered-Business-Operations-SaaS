@@ -1,6 +1,5 @@
 """
-OpsMind AI — Pydantic Schemas: Ticket Classification
-Section 33: Modular schema definitions
+ Modular schema definitions
 """
 
 from pydantic import BaseModel
