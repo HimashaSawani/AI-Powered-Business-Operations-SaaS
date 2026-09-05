@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * Section 32 — Form Request: Store Order
+ * Form Request: Store Order
  *
  * Validates order creation payload before it reaches the controller.
  */
