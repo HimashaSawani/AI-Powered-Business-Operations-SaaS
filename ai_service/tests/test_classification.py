@@ -30,10 +30,10 @@ class TestTicketClassificationLogic:
         category = "general"
         if any(kw in text for kw in billing_keywords):
             category = "billing"
-        elif any(kw in text for kw in technical_keywords):
-            category = "technical"
         elif any(kw in text for kw in auth_keywords):
             category = "authentication"
+        elif any(kw in text for kw in technical_keywords):
+            category = "technical"
 
         # Sentiment detection
         negative_keywords = ["charged twice", "angry", "unacceptable", "fraud", "terrible", "worst"]
