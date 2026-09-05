@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * Section 32 — Form Request: Store Ticket
+ * Form Request: Store Ticket
  */
 class StoreTicketRequest extends FormRequest
 {
