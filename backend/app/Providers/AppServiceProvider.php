@@ -30,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      *
-     * Section 32:
+     * 
      * - Registers Event ↔ Listener bindings
      * - Registers Model Policies for tenant-isolation authorization
      */
@@ -38,17 +38,15 @@ class AppServiceProvider extends ServiceProvider
     {
         // ── Section 32: Event → Listener bindings ────────────────────────────
 
-        // When an order is created, update the customer's metrics (LTV, order count)
-        Event::listen(OrderCreated::class, UpdateCustomerMetrics::class);
+        // When an order is created, record audit trail entry
+        Event::listen(OrderCreated::class, \App\Listeners\RecordAuditTrail::class);
 
-        // When inventory falls below reorder level, create a system notification alert
-        Event::listen(InventoryLow::class, SendInventoryAlert::class);
 
-        // ── Section 32: Model Policies ────────────────────────────────────────
+        // ── Model Policies ────────────────────────────────────────
         // These enforce tenant isolation — users can only access their org's data
 
         Gate::policy(Customer::class, CustomerPolicy::class);
-        Gate::policy(Order::class,    OrderPolicy::class);
-        Gate::policy(Ticket::class,   TicketPolicy::class);
+        Gate::policy(Order::class, OrderPolicy::class);
+        Gate::policy(Ticket::class, TicketPolicy::class);
     }
 }
