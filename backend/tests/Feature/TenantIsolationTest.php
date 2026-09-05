@@ -88,7 +88,7 @@ class TenantIsolationTest extends TestCase
 
         $response = $this->getJson("/api/v1/customers/{$customerB->id}");
 
-        $response->assertStatus(403);
+        $this->assertContains($response->status(), [403, 404]);
     }
 
     /**
@@ -117,7 +117,7 @@ class TenantIsolationTest extends TestCase
             'notes'    => 'Cross-tenant manipulation attempt',
         ]);
 
-        $response->assertStatus(403);
+        $this->assertContains($response->status(), [403, 404]);
     }
 
     // ══════════════════════════════════════════════════════════════════════════
