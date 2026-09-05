@@ -1,5 +1,5 @@
 """
-OpsMind AI - Dedicated AI Operations Intelligence Microservice
+Dedicated AI Operations Intelligence Microservice
 Expanded with:
 1. NLP Ticket Classification (Sentiment, Category, Priority, Confidence, Department Routing)
 2. 6-Factor Customer Health Scoring (RFM, Support, Refunds, Engagement)
