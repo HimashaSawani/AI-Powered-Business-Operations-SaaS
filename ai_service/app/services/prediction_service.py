@@ -1,6 +1,5 @@
 """
-OpsMind AI — Service: Prediction Service
-Section 33: Safety stock and stockout prediction calculations
+Safety stock and stockout prediction calculations
 """
 
 import math
