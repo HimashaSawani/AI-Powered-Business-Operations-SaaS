@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Section 37 — API Metrics Middleware
+ * API Metrics Middleware
  *
  * Captures per-request performance telemetry:
  * - Response time in milliseconds
