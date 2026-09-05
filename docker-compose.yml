@@ -1,0 +1,206 @@
+version: '3.9'
+
+# ──────────────────────────────────────────────────────────────────────────────
+# OpsMind AI — Docker Compose Stack (Section 34)
+#
+# 8 services:
+#   nginx      → Reverse proxy (port 80 → laravel + frontend)
+#   laravel    → PHP-FPM application container
+#   worker     → Queue worker (same image, different command)
+#   scheduler  → Laravel scheduler (same image, loops every 60s)
+#   mysql      → MySQL 8.0 with persistent storage
+#   redis      → Redis 7 for queues, cache, sessions
+#   python-ai  → FastAPI AI microservice (port 8001)
+#   frontend   → React production build served via nginx
+#
+# Network: opsmind-network (internal bridge)
+# Volumes: mysql-data, redis-data, laravel-storage
+# ──────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── Reverse Proxy ───────────────────────────────────────────────────────────
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: opsmind-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./backend:/var/www/html:ro
+    depends_on:
+      - laravel
+      - frontend
+    networks:
+      - opsmind-network
+    restart: unless-stopped
+
+  # ── Laravel Application ─────────────────────────────────────────────────────
+  laravel:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: opsmind-laravel
+    environment:
+      APP_ENV: production
+      APP_KEY: ${APP_KEY}
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-opsmind}
+      DB_USERNAME: ${DB_USERNAME:-opsmind}
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      QUEUE_CONNECTION: redis
+      CACHE_STORE: redis
+      SESSION_DRIVER: redis
+      AI_SERVICE_URL: http://python-ai:8001
+    volumes:
+      - laravel-storage:/var/www/html/storage
+      - ./backend:/var/www/html
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - opsmind-network
+    restart: unless-stopped
+
+  # ── Queue Worker ────────────────────────────────────────────────────────────
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: opsmind-worker
+    command: php artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
+    environment:
+      APP_ENV: production
+      APP_KEY: ${APP_KEY}
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_DATABASE: ${DB_DATABASE:-opsmind}
+      DB_USERNAME: ${DB_USERNAME:-opsmind}
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
+      REDIS_HOST: redis
+      QUEUE_CONNECTION: redis
+      AI_SERVICE_URL: http://python-ai:8001
+    volumes:
+      - laravel-storage:/var/www/html/storage
+      - ./backend:/var/www/html
+    depends_on:
+      - laravel
+      - redis
+    networks:
+      - opsmind-network
+    restart: unless-stopped
+
+  # ── Scheduler ───────────────────────────────────────────────────────────────
+  scheduler:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: opsmind-scheduler
+    command: >
+      sh -c "while true; do
+        php artisan schedule:run --verbose --no-interaction >> /var/log/scheduler.log 2>&1;
+        sleep 60;
+      done"
+    environment:
+      APP_ENV: production
+      APP_KEY: ${APP_KEY}
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_DATABASE: ${DB_DATABASE:-opsmind}
+      DB_USERNAME: ${DB_USERNAME:-opsmind}
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
+      REDIS_HOST: redis
+    volumes:
+      - laravel-storage:/var/www/html/storage
+      - ./backend:/var/www/html
+    depends_on:
+      - laravel
+      - mysql
+    networks:
+      - opsmind-network
+    restart: unless-stopped
+
+  # ── MySQL Database ──────────────────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: opsmind-mysql
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-opsmind}
+      MYSQL_USER: ${DB_USERNAME:-opsmind}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootsecret}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "3307:3306"    # Expose on 3307 to avoid conflicts with local MySQL
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootsecret}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - opsmind-network
+    restart: unless-stopped
+
+  # ── Redis ───────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: opsmind-redis
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6380:6379"    # Expose on 6380 to avoid conflicts with local Redis
+    networks:
+      - opsmind-network
+    restart: unless-stopped
+
+  # ── Python AI Microservice ──────────────────────────────────────────────────
+  python-ai:
+    build:
+      context: ./ai_service
+      dockerfile: Dockerfile
+    container_name: opsmind-python-ai
+    environment:
+      PYTHONUNBUFFERED: "1"
+    ports:
+      - "8001:8001"
+    networks:
+      - opsmind-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── React Frontend ──────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: opsmind-frontend
+    networks:
+      - opsmind-network
+    restart: unless-stopped
+
+# ── Networks ─────────────────────────────────────────────────────────────────
+networks:
+  opsmind-network:
+    driver: bridge
+
+# ── Volumes ──────────────────────────────────────────────────────────────────
+volumes:
+  mysql-data:
+    driver: local
+  redis-data:
+    driver: local
+  laravel-storage:
+    driver: local
