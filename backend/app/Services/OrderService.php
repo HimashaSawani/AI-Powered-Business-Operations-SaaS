@@ -9,6 +9,7 @@ use App\Models\Payment;
 use App\Models\Product;
 use App\Models\InventoryMovement;
 use App\Models\AiCustomerScore;
+use App\Events\OrderCreated;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Exception;
@@ -137,15 +138,12 @@ class OrderService
                 'status' => 'successful',
             ]);
 
-            // 7. Update Customer metrics (LTV, total orders, last order date)
-            $customer->total_orders += 1;
-            $customer->lifetime_value += $totalAmount;
-            $customer->last_order_at = now();
-            $customer->status = 'active'; // Recent purchase reactivates account
-            $customer->save();
-
-            // 8. Update AI customer health score based on fresh purchase event
+            // 7. Update AI customer health score based on fresh purchase event
             $this->updateAiCustomerScore($customer, $organizationId);
+
+            // 8. Dispatch domain event for decoupled customer metrics update, audit trail, and notifications
+            OrderCreated::dispatch($order, $userId);
+
 
             return $order->load(['items.product', 'customer', 'payments']);
         });
