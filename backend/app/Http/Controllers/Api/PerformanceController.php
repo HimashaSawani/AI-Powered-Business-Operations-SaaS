@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 /**
- * Section 37 — Performance Metrics endpoint.
+ * Performance Metrics endpoint.
  * Adds performanceMetrics() to DashboardController.
  * This file extends the existing DashboardController via a trait-compatible addon.
  */
