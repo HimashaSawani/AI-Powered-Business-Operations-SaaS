@@ -1,6 +1,5 @@
 """
-OpsMind AI — Tests: Customer Health Score
-Section 33: pytest tests for the 6-factor customer health score model
+pytest tests for the 6-factor customer health score model
 """
 
 import sys
