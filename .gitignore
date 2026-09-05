@@ -1,0 +1,28 @@
+# Dependencies
+/node_modules
+/*/node_modules
+/vendor
+/*/vendor
+
+# Environment & Secrets
+.env
+*.env
+!.env.example
+!*/.env.example
+
+# Build & Cache
+dist
+/*/dist
+__pycache__/
+/*/__pycache__/
+/*/*/__pycache__/
+.pytest_cache
+.phpunit.result.cache
+/*/storage/*.key
+
+# System & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
