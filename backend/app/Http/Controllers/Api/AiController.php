@@ -11,8 +11,17 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
+use App\Services\AiService;
+
 class AiController extends Controller
 {
+    protected AiService $aiService;
+
+    public function __construct(AiService $aiService)
+    {
+        $this->aiService = $aiService;
+    }
+
     public function churnOverview(Request $request)
     {
         $scores = AiCustomerScore::with('customer')
@@ -37,67 +46,13 @@ class AiController extends Controller
     public function productForecast(Request $request, $productId)
     {
         $product = Product::with(['category', 'supplier'])->findOrFail($productId);
-
-        // Fetch recent sales activity for this product
         $recentSalesUnits = [4, 6, 5, 8, 7, 9, 8, 12, 10, 11, 9, 14, 13, 15];
 
-        // Attempt microservice integration or compute calibrated statistical forecast
-        try {
-            $response = Http::timeout(2)->post('http://127.0.0.1:8001/api/ai/forecast-sales', [
-                'product_id' => $product->id,
-                'product_name' => $product->name,
-                'sku' => $product->sku,
-                'current_stock' => $product->current_stock,
-                'reorder_level' => $product->reorder_level,
-                'history' => array_map(function ($units, $idx) {
-                    return [
-                        'date' => now()->subDays(14 - $idx)->format('Y-m-d'),
-                        'units_sold' => $units,
-                    ];
-                }, $recentSalesUnits, array_keys($recentSalesUnits)),
-                'forecast_days' => 30,
-            ]);
+        $forecast = $this->aiService->getSalesForecast($product, $recentSalesUnits);
 
-            if ($response->successful()) {
-                return response()->json($response->json());
-            }
-        } catch (\Throwable $th) {
-            // Fallback to internal statistical forecast algorithm
-        }
-
-        // Calibrated local fallback calculation.
-        $avgDaily = round(array_sum($recentSalesUnits) / count($recentSalesUnits), 1);
-        $daysUntilOut = $product->current_stock > 0 ? (int) floor($product->current_stock / max(1, $avgDaily)) : 0;
-        $urgency = $daysUntilOut <= 7 ? 'CRITICAL' : ($daysUntilOut <= 14 ? 'URGENT' : 'HEALTHY');
-
-        $series = [];
-        $remaining = $product->current_stock;
-        for ($i = 1; $i <= 30; $i++) {
-            $predictedUnits = round($avgDaily * (1 + ($i * 0.015)), 1);
-            $remaining = max(0, round($remaining - $predictedUnits));
-            $series[] = [
-                'day' => $i,
-                'date' => now()->addDays($i)->format('Y-m-d'),
-                'predicted_units' => $predictedUnits,
-                'projected_remaining_stock' => $remaining,
-            ];
-        }
-
-        return response()->json([
-            'product_id' => $product->id,
-            'product_name' => $product->name,
-            'sku' => $product->sku,
-            'current_stock' => $product->current_stock,
-            'reorder_level' => $product->reorder_level,
-            'daily_run_rate' => $avgDaily,
-            'estimated_days_until_stockout' => $daysUntilOut,
-            'stockout_predicted_date' => now()->addDays($daysUntilOut)->format('Y-m-d'),
-            'reorder_recommended' => $product->current_stock <= ($avgDaily * 14),
-            'reorder_urgency' => $urgency,
-            'recommended_reorder_units' => (int) ceil($avgDaily * 45),
-            'forecast_series' => $series,
-        ]);
+        return response()->json($forecast);
     }
+
 
     public function insights(Request $request)
     {
