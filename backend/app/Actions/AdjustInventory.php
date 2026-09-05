@@ -9,7 +9,7 @@ use App\Services\InventoryService;
 use Illuminate\Support\Facades\Request;
 
 /**
- * Section 32 — Action: Adjust Inventory
+ * Adjust Inventory
  *
  * Orchestrates an inventory adjustment:
  * 1. Calls InventoryService for atomic stock update
@@ -54,7 +54,7 @@ class AdjustInventory
             'action'          => 'inventory_adjust',
             'entity_type'     => 'Product',
             'entity_id'       => $product?->sku ?? (string) $productId,
-            'summary'         => "Stock adjusted: {$product?->name} ({$quantity > 0 ? '+' : ''}{$quantity} units via {$type}). New balance: {$movement->balance_after}",
+            'summary'         => 'Stock adjusted: ' . ($product?->name ?? '') . ' (' . ($quantity > 0 ? '+' : '') . $quantity . " units via {$type}). New balance: {$movement->balance_after}",
             'old_values'      => ['stock' => $movement->balance_after - $quantity],
             'new_values'      => ['stock' => $movement->balance_after],
             'ip_address'      => Request::ip(),
