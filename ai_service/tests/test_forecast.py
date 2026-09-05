@@ -1,6 +1,5 @@
 """
-OpsMind AI — Tests: Forecasting Service
-Section 33: pytest tests for Moving Average, MAE, RMSE, MAPE, and best-fit model selection
+ pytest tests for Moving Average, MAE, RMSE, MAPE, and best-fit model selection
 """
 
 import sys
