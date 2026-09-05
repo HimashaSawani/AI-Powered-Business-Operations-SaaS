@@ -12,14 +12,9 @@
 A multi-tenant business operations platform with an integrated Python AI engine for customer health scoring, sales forecasting, and intelligent ticket classification.
 ## 🌐 Live Demo
 
-<<<<<<< HEAD
 🌐 **Live Demo**: [https://ai-powered-business-operations-saa.vercel.app/](https://ai-powered-business-operations-saa.vercel.app/)
 
 
-=======
-*Live Application:* https://ai-powered-business-operations-saa.vercel.app/
->>>>>>> c124b7f129a569e0ce93bb9e1e84f194f0802f7e
----
 
 ## 🏗️ Architecture
 
