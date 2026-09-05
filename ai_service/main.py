@@ -128,6 +128,10 @@ def classify_ticket(req: TicketClassificationRequest):
         category = "billing"
         assigned_team = "Billing & Payments Team"
         default_priority = "high" if any(k in text for k in ['twice', 'overcharged', 'wrong', 'fraud', 'unauthorized', 'stolen', 'error']) else "medium"
+    elif any(k in text for k in ['login', 'password', 'authentication', 'auth', 'sign in', 'access']):
+        category = "authentication"
+        assigned_team = "Security & Access Support"
+        default_priority = "high" if any(k in text for k in ['cannot', 'lock', 'error']) else "medium"
     elif any(k in text for k in ['firmware', 'bluetooth', 'broken', 'defect', 'not working', 'crash', 'bug', 'setup', 'driver', 'pair']):
         category = "technical"
         assigned_team = "Technical Support Team"
