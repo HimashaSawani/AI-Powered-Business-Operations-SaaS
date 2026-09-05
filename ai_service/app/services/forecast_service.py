@@ -1,7 +1,4 @@
-"""
-OpsMind AI — Service: Forecast Service
-Section 33: Modular service layer for forecast calculations (MA, ARIMA trend, RF approximation)
-"""
+
 
 import numpy as np
 import math
