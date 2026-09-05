@@ -6,7 +6,7 @@ use App\Events\OrderCreated;
 use App\Models\Customer;
 
 /**
- * Section 32 — Listener: Update Customer Metrics
+ * Listener: Update Customer Metrics
  *
  * Listens to OrderCreated event.
  * Updates customer lifetime value, order count, and last order date.

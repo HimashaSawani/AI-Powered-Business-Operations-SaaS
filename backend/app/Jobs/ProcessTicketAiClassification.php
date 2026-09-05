@@ -15,7 +15,7 @@ class ProcessTicketAiClassification implements ShouldQueue
     public $ticket;
 
     /**
-     * Create a new job instance.
+     * Create a new job instance
      */
     public function __construct(Ticket $ticket)
     {
