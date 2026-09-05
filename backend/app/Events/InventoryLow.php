@@ -7,7 +7,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
 /**
- * Section 32 — Domain Event: Inventory Low
+ * Domain Event: Inventory Low
  *
  * Fired when a product's stock drops to or below its reorder level.
  * Triggers: SendInventoryAlert listener (creates system notification).
