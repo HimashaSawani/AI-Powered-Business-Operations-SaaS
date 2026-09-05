@@ -6,7 +6,7 @@ use App\Events\InventoryLow;
 use App\Models\SystemNotification;
 
 /**
- * Section 32 — Listener: Send Inventory Alert
+ *  Send Inventory Alert
  *
  * Listens to InventoryLow event.
  * Creates a system notification so staff see an alert in their notification bell.
