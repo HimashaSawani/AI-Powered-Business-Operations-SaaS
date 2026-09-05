@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * Section 32 — Form Request: Adjust Inventory
+ * Form Request: Adjust Inventory
  */
 class AdjustInventoryRequest extends FormRequest
 {
