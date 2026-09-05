@@ -1,6 +1,5 @@
 """
-OpsMind AI — Tests: Ticket Classification
-Section 33: pytest tests for the NLP ticket classification logic
+pytest tests for the NLP ticket classification logic
 """
 
 import sys
