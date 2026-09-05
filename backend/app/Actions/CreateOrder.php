@@ -9,7 +9,7 @@ use App\Services\OrderService;
 use Illuminate\Support\Facades\Request;
 
 /**
- * Section 32 — Action: Create Order
+ * Create Order
  *
  * Single-purpose action that orchestrates order creation:
  * 1. Calls OrderService for the atomic DB transaction
