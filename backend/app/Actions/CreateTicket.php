@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Str;
 
 /**
- * Section 32 — Action: Create Ticket
+ *  Create Ticket
  *
  * Orchestrates ticket creation:
  * 1. Creates the ticket record with pre-classification
