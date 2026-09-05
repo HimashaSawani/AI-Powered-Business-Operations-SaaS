@@ -1,4 +1,4 @@
-# OpsMind AI — Enterprise Business Operations SaaS
+# Enterprise Business Operations SaaS
 
 [![CI/CD Pipeline](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=github-actions&logoColor=white)](https://github.com)
 [![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen?logo=php)](https://github.com)
@@ -7,8 +7,12 @@
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://reactjs.org)
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python)](https://python.org)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)](https://docker.com)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-000000?logo=vercel&logoColor=white)](https://ai-powered-business-operations-saa.vercel.app/)
 
 A multi-tenant business operations platform with an integrated Python AI engine for customer health scoring, sales forecasting, and intelligent ticket classification.
+
+🌐 **Live Demo**: [https://ai-powered-business-operations-saa.vercel.app/](https://ai-powered-business-operations-saa.vercel.app/)
+
 
 ---
 
