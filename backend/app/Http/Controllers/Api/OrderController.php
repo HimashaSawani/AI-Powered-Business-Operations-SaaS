@@ -8,6 +8,8 @@ use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Exception;
 
+use App\Http\Requests\StoreOrderRequest;
+
 class OrderController extends Controller
 {
     protected $orderService;
@@ -32,19 +34,10 @@ class OrderController extends Controller
         return response()->json($query->paginate(20));
     }
 
-    public function store(Request $request)
+    public function store(StoreOrderRequest $request)
     {
-        $validated = $request->validate([
-            'customer_id' => 'required|integer',
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|integer',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.unit_price' => 'nullable|numeric|min:0',
-            'tax_rate' => 'nullable|numeric|min:0',
-            'discount_amount' => 'nullable|numeric|min:0',
-            'payment_method' => 'nullable|string',
-            'notes' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
+
 
         $orgId = $request->user()->current_organization_id ?? 1;
         $userId = $request->user()->id ?? null;
