@@ -1,4 +1,7 @@
-FROM php:8.3-fpm-alpine
+FROM php:8.4-cli-alpine
+
+# Set Composer permissions
+ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # System dependencies
 RUN apk add --no-cache \
@@ -9,7 +12,8 @@ RUN apk add --no-cache \
     zip \
     unzip \
     oniguruma-dev \
-    sqlite-dev
+    sqlite-dev \
+    sqlite
 
 # PHP extensions
 RUN docker-php-ext-install \
@@ -23,30 +27,26 @@ RUN docker-php-ext-install \
     gd \
     xml
 
-# Redis extension
-RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
-    && pecl install redis \
-    && docker-php-ext-enable redis \
-    && apk del .build-deps
-
 # Install Composer
-COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-WORKDIR /var/www/html
+WORKDIR /app
 
-# Copy composer files first for dependency caching
+# Copy composer files first
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-scripts --no-autoloader --optimize-autoloader
+RUN composer install --no-dev --no-scripts --no-autoloader --optimize-autoloader --ignore-platform-req=php+
 
-# Copy application
+# Copy the rest of the application
 COPY . .
 
-# Generate autoloader and optimize
+# Ensure storage, cache, and sqlite database exist with full write permissions
+RUN mkdir -p database storage/framework/views storage/framework/cache storage/framework/sessions storage/logs bootstrap/cache \
+    && touch database/database.sqlite \
+    && chmod -R 777 storage bootstrap/cache database
+
+# Generate optimized autoloader
 RUN composer dump-autoload --optimize
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html/storage \
-    && chown -R www-data:www-data /var/www/html/bootstrap/cache
+EXPOSE 8080
 
-EXPOSE 9000
-CMD ["php-fpm"]
+CMD ["sh", "-c", "php artisan migrate --force --seed && php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"]
