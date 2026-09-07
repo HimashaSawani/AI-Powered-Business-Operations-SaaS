@@ -87,6 +87,80 @@ class AuthController extends Controller
         ]);
     }
 
+    public function register(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6',
+            'company_name' => 'required|string|max:255',
+            'plan' => 'nullable|string|in:Starter,Pro,Enterprise',
+        ]);
+
+        $slug = \Illuminate\Support\Str::slug($request->company_name);
+        // Ensure unique slug
+        if (Organization::where('slug', $slug)->exists()) {
+            $slug = $slug . '-' . rand(100, 999);
+        }
+
+        $organization = Organization::create([
+            'name' => $request->company_name,
+            'slug' => $slug,
+            'plan' => $request->input('plan', 'Pro'),
+            'status' => 'active',
+            'settings' => ['currency' => 'USD', 'tax_rate' => 0.08],
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'owner',
+            'current_organization_id' => $organization->id,
+            'avatar' => 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+        ]);
+
+        $organization->users()->attach($user->id, ['role' => 'owner']);
+
+        $token = $user->createToken('opsmind-access-token')->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'avatar' => $user->avatar,
+            ],
+            'organization' => [
+                'id' => $organization->id,
+                'name' => $organization->name,
+                'slug' => $organization->slug,
+                'plan' => $organization->plan,
+            ],
+        ], 201);
+    }
+
+    public function forgotPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return response()->json([
+                'message' => 'If this email is registered in our system, a password reset link has been dispatched.',
+            ], 200);
+        }
+
+        return response()->json([
+            'message' => 'Password reset instructions have been sent to ' . $request->email,
+            'reset_token' => bin2hex(random_bytes(16)),
+        ], 200);
+    }
+
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();

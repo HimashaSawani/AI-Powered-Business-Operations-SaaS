@@ -1,7 +1,7 @@
 version: '3.9'
 
 # ──────────────────────────────────────────────────────────────────────────────
-# OpsMind AI — Docker Compose Stack (Section 34)
+# Docker Compose Stack 
 #
 # 8 services:
 #   nginx      → Reverse proxy (port 80 → laravel + frontend)

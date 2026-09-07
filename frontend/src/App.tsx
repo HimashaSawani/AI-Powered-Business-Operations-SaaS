@@ -9,6 +9,7 @@ import { CrmView } from './views/CrmView';
 import { HelpdeskView } from './views/HelpdeskView';
 import { AiIntelligenceView } from './views/AiIntelligenceView';
 import { AuditLogView } from './views/AuditLogView';
+import { AuthView } from './views/AuthView';
 import { 
   initialOrganizations, 
   demoUsers, 
@@ -36,11 +37,19 @@ import {
 } from './types';
 
 export function App() {
+  // Platform Authentication State
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return localStorage.getItem('opsmind_auth') === 'true';
+  });
+  const [authToken, setAuthToken] = useState<string | null>(() => {
+    return localStorage.getItem('opsmind_token');
+  });
+
   // Platform Tenant & Persona State
-  const [organizations] = useState<Organization[]>(initialOrganizations);
+  const [organizations, setOrganizations] = useState<Organization[]>(initialOrganizations);
   const [currentOrg, setCurrentOrg] = useState<Organization>(initialOrganizations[0]);
-  const [users] = useState<User[]>(demoUsers);
-  const [currentUser, setCurrentUser] = useState<User>(demoUsers[2]); // Marcus Chen (Operations Manager) by default
+  const [users, setUsers] = useState<User[]>(demoUsers);
+  const [currentUser, setCurrentUser] = useState<User>(demoUsers[0]); // Alexander Vance (Super Admin) by default
 
   // Navigation & Search State
   const [activeTab, setActiveTab] = useState<TabKey>('dashboard');
@@ -65,6 +74,52 @@ export function App() {
     setTimeout(() => {
       setToastMessage(null);
     }, 4500);
+  };
+
+  // Auth Handlers
+  const handleLoginSuccess = (user: User, organization: Organization, token?: string) => {
+    setCurrentUser(user);
+    setOrganizations((prev) => {
+      if (!prev.find((o) => o.id === organization.id)) {
+        return [...prev, organization];
+      }
+      return prev;
+    });
+    setUsers((prev) => {
+      if (!prev.find((u) => u.id === user.id)) {
+        return [...prev, user];
+      }
+      return prev;
+    });
+    setCurrentOrg(organization);
+    setIsAuthenticated(true);
+    if (token) {
+      setAuthToken(token);
+      localStorage.setItem('opsmind_token', token);
+    }
+    localStorage.setItem('opsmind_auth', 'true');
+    showToast('Welcome to OpsMind AI', `Signed in as ${user.name} (${organization.name})`, 'success');
+  };
+
+  const handleLogout = async () => {
+    try {
+      if (authToken && authToken.includes('|')) {
+        await fetch('http://127.0.0.1:8002/api/v1/auth/logout', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            Accept: 'application/json',
+          },
+        });
+      }
+    } catch {
+      // Ignore network errors on logout
+    }
+    setIsAuthenticated(false);
+    setAuthToken(null);
+    localStorage.removeItem('opsmind_auth');
+    localStorage.removeItem('opsmind_token');
+    showToast('Signed Out', 'You have been securely signed out of OpsMind AI.', 'alert');
   };
 
   // 1. Cross-Module Atomic Order Placement Handler
@@ -403,6 +458,10 @@ export function App() {
   const openTicketsCount = tickets.filter((t) => t.status === 'open' || t.status === 'in_progress').length;
   const activeInsightsCount = insights.filter((i) => i.status === 'active').length;
 
+  if (!isAuthenticated) {
+    return <AuthView onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-[#07090e] text-slate-100 selection:bg-indigo-500 selection:text-white">
       {/* Platform Header with Notification Bell & Global Search */}
@@ -426,6 +485,7 @@ export function App() {
         onOpenArchModal={() => setIsArchModalOpen(true)}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        onLogout={handleLogout}
       />
 
       {/* Main App Layout */}

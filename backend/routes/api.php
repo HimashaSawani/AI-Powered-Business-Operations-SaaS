@@ -25,7 +25,9 @@ Route::prefix('v1')->group(function () {
 
     // Authentication
     Route::prefix('auth')->group(function () {
-        Route::post('/login',  [AuthController::class, 'login']);
+        Route::post('/login',           [AuthController::class, 'login']);
+        Route::post('/register',        [AuthController::class, 'register']);
+        Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
     });
 
     // ── Protected Routes (Sanctum Auth Required) ──────────────────────────
