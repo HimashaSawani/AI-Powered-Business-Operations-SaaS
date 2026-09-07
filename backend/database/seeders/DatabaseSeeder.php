@@ -25,6 +25,12 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // Prevent duplicate seed errors if already seeded
+        if (User::where('email', 'admin@opsmind.ai')->exists()) {
+            $this->command?->info('Database already seeded. Skipping.');
+            return;
+        }
+
         // 1. Organizations
         $org1 = Organization::create([
             'name' => 'Apex Dynamics Ltd',

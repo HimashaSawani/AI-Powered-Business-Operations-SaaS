@@ -32,21 +32,19 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
-# Copy composer files first
+# Copy composer files first for caching
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader --optimize-autoloader --ignore-platform-req=php+
 
-# Copy the rest of the application
+# Copy application
 COPY . .
-
-# Ensure storage, cache, and sqlite database exist with full write permissions
-RUN mkdir -p database storage/framework/views storage/framework/cache storage/framework/sessions storage/logs bootstrap/cache \
-    && touch database/database.sqlite \
-    && chmod -R 777 storage bootstrap/cache database
 
 # Generate optimized autoloader
 RUN composer dump-autoload --optimize
 
+# Make entrypoint script executable
+RUN chmod +x entrypoint.sh
+
 EXPOSE 8080
 
-CMD ["sh", "-c", "php artisan migrate --force --seed && php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"]
+CMD ["./entrypoint.sh"]
