@@ -10,6 +10,7 @@ import { HelpdeskView } from './views/HelpdeskView';
 import { AiIntelligenceView } from './views/AiIntelligenceView';
 import { AuditLogView } from './views/AuditLogView';
 import { AuthView } from './views/AuthView';
+import { API_BASE_URL } from './config';
 import { 
   initialOrganizations, 
   demoUsers, 
@@ -104,7 +105,7 @@ export function App() {
   const handleLogout = async () => {
     try {
       if (authToken && authToken.includes('|')) {
-        await fetch('http://127.0.0.1:8002/api/v1/auth/logout', {
+        await fetch(`${API_BASE_URL}/api/v1/auth/logout`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${authToken}`,

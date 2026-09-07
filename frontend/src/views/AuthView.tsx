@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { User, Organization } from '../types';
 import { demoUsers, initialOrganizations } from '../mockData';
+import { API_BASE_URL } from '../config';
 
 interface AuthViewProps {
   onLoginSuccess: (user: User, organization: Organization, token?: string) => void;
@@ -61,7 +62,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLoginSuccess }) => {
 
     try {
       // 1. Try real Laravel API login
-      const response = await fetch('http://127.0.0.1:8002/api/v1/auth/login', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ email: loginEmail, password: loginPassword }),
@@ -113,7 +114,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLoginSuccess }) => {
 
     try {
       // Try real Laravel API registration
-      const response = await fetch('http://127.0.0.1:8002/api/v1/auth/register', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({
@@ -175,7 +176,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLoginSuccess }) => {
     if (!forgotEmail) return;
 
     try {
-      await fetch('http://127.0.0.1:8002/api/v1/auth/forgot-password', {
+      await fetch(`${API_BASE_URL}/api/v1/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ email: forgotEmail })
