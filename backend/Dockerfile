@@ -39,12 +39,14 @@ RUN composer install --no-dev --no-scripts --no-autoloader --optimize-autoloader
 # Copy application
 COPY . .
 
+# Ensure storage directories & sqlite database exist with write permissions
+RUN mkdir -p database storage/framework/views storage/framework/cache storage/framework/sessions storage/logs bootstrap/cache \
+    && touch database/database.sqlite \
+    && chmod -R 777 storage bootstrap/cache database
+
 # Generate optimized autoloader
 RUN composer dump-autoload --optimize
 
-# Make entrypoint script executable
-RUN chmod +x entrypoint.sh
-
 EXPOSE 8080
 
-CMD ["./entrypoint.sh"]
+CMD ["sh", "-c", "php artisan migrate --force && php artisan db:seed --force && exec php -S 0.0.0.0:${PORT:-8080} -t public public/index.php"]
